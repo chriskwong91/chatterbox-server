@@ -1,4 +1,7 @@
 var _ = require('underscore');
+
+var ObjectID = require('mongodb').ObjectID;
+
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -34,6 +37,7 @@ var Message = function(username, message, roomname, createdAt) {
   this.text = message;
   this.roomname = roomname || 'Lobby';
   this.createdAt = createdAt;
+  this.objectId = new ObjectID();
 };
 
 var storage = {

@@ -62,7 +62,6 @@ var app = {
       success: function(data) {
         data = JSON.parse(data);
 
-        console.log(data);
         // Don't bother if we have nothing to work with
         if (!data.results || !data.results.length) { return; }
 
@@ -72,7 +71,6 @@ var app = {
         app.stopSpinner();
         // Only bother updating the DOM if we have a new message
         if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
-          console.log('populate some messages');
           // Update the UI with the fetched rooms
           app.populateRooms(data.results);
 
