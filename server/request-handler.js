@@ -80,12 +80,12 @@ exports.requestHandler = function(request, response) {
   // which includes the status and all headers.
 
   if (request.method === 'GET' && request.url === '/classes/messages') {
-    statusCode = 200; 
+    statusCode = 200;
     response.writeHead(200, headers);
 
     response.end(JSON.stringify(storage));
   } else if (request.method === 'OPTIONS' || request.url === '/classes/messages/?order=-createdAt') {
-    statusCode = 200; 
+    statusCode = 200;
     response.writeHead(200, headers);
 
     var sortedStorage = {results: []};

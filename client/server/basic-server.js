@@ -1,19 +1,11 @@
 /* Import node's http module: */
 var http = require('http');
 var handleRequest = require('./request-handler');
-var _ = require('underscore');
-var fs = require('file-system');
-var $ = require('jquery');
-var path = require('path');
-var serveStatic = require('serve-static');
-var finalhandler = require('finalhandler');
 
 var port = 3000;
 var ip = '127.0.0.1';
 
 // default value for content type
-
-
 
 // Every server needs to listen on a port with a unique number. The
 // standard port for HTTP servers is port 80, but that port is

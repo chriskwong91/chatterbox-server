@@ -81,7 +81,7 @@ exports.requestHandler = function(request, response) {
     break;
   case '.png':
     contentType = 'image/png';
-    break;      
+    break;
   case '.jpg':
     contentType = 'image/jpg';
     break;
@@ -94,12 +94,12 @@ exports.requestHandler = function(request, response) {
     if (error) {
       if (request.method === 'GET' && request.url === '/classes/messages') {
         console.log('get me');
-        statusCode = 200; 
+        statusCode = 200;
         response.writeHead(200, headers);
 
         response.end(JSON.stringify(storage));
       } else if (request.method === 'OPTIONS' || request.url === '/classes/messages/?order=-createdAt') {
-        statusCode = 200; 
+        statusCode = 200;
         response.writeHead(200, headers);
 
         var sortedStorage = {results: []};
@@ -132,7 +132,6 @@ exports.requestHandler = function(request, response) {
         response.writeHead(statusCode, headers);
         response.end();
       }
-
     } else {
       response.writeHead(200, { 'Content-Type': contentType });
       response.end(content, 'utf-8');
