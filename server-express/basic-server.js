@@ -15,6 +15,9 @@ app.route('/classes/messages')
   })
   .post(function(req, res) {
     handleRequest.requestHandler(req, res);
+  })
+  .options(function(req, res) {
+    handleRequest.requestHandler(req, res);
   });
 
 app.listen(3000, function() {
