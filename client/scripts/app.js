@@ -61,6 +61,7 @@ var app = {
       data: { order: '-createdAt'},
       success: function(data) {
         data = JSON.parse(data);
+        app.stopSpinner();
 
         // Don't bother if we have nothing to work with
         if (!data.results || !data.results.length) { return; }
@@ -68,7 +69,6 @@ var app = {
         // Get the last message
         var mostRecentMessage = data.results[data.results.length - 1];
         var displayedRoom = $('.chat span').first().data('roomname');
-        app.stopSpinner();
         // Only bother updating the DOM if we have a new message
         if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
           // Update the UI with the fetched rooms
@@ -162,7 +162,7 @@ var app = {
       }
 
       var $message = $('<br><span/>');
-      $message.text(data.text).appendTo($chat);
+      $message.text(data.message).appendTo($chat);
 
       // Add the message to the UI
       app.$chats.prepend($chat);
@@ -215,7 +215,7 @@ var app = {
   handleSubmit: function(evt) {
     var message = {
       username: app.username,
-      text: app.$message.val(),
+      message: app.$message.val(),
       roomname: app.roomname || 'lobby'
     };
 

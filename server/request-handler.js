@@ -34,14 +34,14 @@ var defaultCorsHeaders = {
 
 var Message = function(username, message, roomname, createdAt) {
   this.username = username || 'username';
-  this.text = message;
+  this.message = message;
   this.roomname = roomname || 'Lobby';
   this.createdAt = createdAt;
   this.objectId = new ObjectID();
 };
 
 var storage = {
-  results: [new Message('dog', 'woof', 'kennel', new Date())],
+  results: [],
 };
 
 exports.defaultCorseHeaders = defaultCorsHeaders;
@@ -77,13 +77,10 @@ exports.requestHandler = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  // response.writeHead(statusCode, headers);
 
   if (request.method === 'GET' && request.url === '/classes/messages') {
     statusCode = 200; 
     response.writeHead(200, headers);
-
-    console.log(request.data);
 
     response.end(JSON.stringify(storage));
   } else if (request.method === 'OPTIONS' || request.url === '/classes/messages/?order=-createdAt') {
@@ -93,7 +90,6 @@ exports.requestHandler = function(request, response) {
     var sortedStorage = {results: []};
     sortedStorage.results = _.sortBy(storage.results, 'createdAt');
 
-    console.log(storage);
     response.end(JSON.stringify(sortedStorage));
   } else if (request.method === 'POST') {
     statusCode = 201;
@@ -108,7 +104,7 @@ exports.requestHandler = function(request, response) {
       var parsed = JSON.parse(result);
       var newMessage = new Message(
         parsed.username,
-        parsed.text,
+        parsed.message,
         parsed.roomname,
         new Date()
       );
@@ -119,7 +115,6 @@ exports.requestHandler = function(request, response) {
   } else {
     statusCode = 404;
     response.writeHead(statusCode, headers);
-    console.log('hi', response.statusCode);
     response.end();
   }
 
