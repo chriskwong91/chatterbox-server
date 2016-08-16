@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var fs = require('file-system');
+var path = require('path');
 
 var ObjectID = require('mongodb').ObjectID;
 
@@ -48,6 +49,65 @@ var storage = {
 exports.defaultCorseHeaders = defaultCorsHeaders;
 
 exports.requestHandler = function(request, response) {
+ console.log('request starting..now.');
+
+  var filePath = '.' + request.url;
+  if (filePath === './') {
+    console.log('in file path');
+    filePath = './index.html';
+  }
+  console.log(filePath);
+  // var extname = path.extname(filePath);
+  var contentType = 'text/html';
+  console.log(extname, 'here2');
+  switch (extname) {
+        case '.js':
+            contentType = 'text/javascript';
+            break;
+        case '.css':
+            contentType = 'text/css';
+            break;
+        case '.json':
+            contentType = 'application/json';
+            break;
+        case '.png':
+            contentType = 'image/png';
+            break;      
+        case '.jpg':
+            contentType = 'image/jpg';
+            break;
+        case '.wav':
+            contentType = 'audio/wav';
+            break;
+    }
+    console.log(filePath, contentType, 'here');
+    fs.readFile(filePath, function(error, content) {
+        if (error) {
+            if(error.code == 'ENOENT'){
+                fs.readFile('./404.html', function(error, content) {
+                    response.writeHead(200, { 'Content-Type': contentType });
+                    response.end(content, 'utf-8');
+                });
+            }
+            else {
+                response.writeHead(500);
+                response.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
+                response.end(); 
+            }
+        }
+        else {
+          console.log(content);
+            response.writeHead(200, { 'Content-Type': contentType });
+            response.end(content, 'utf-8');
+        }
+    });
+
+}).listen(3000);
+
+
+
+
+
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as

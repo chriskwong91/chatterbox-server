@@ -1,7 +1,11 @@
 var _ = require('underscore');
 var fs = require('file-system');
+var path = require('path');
 
 var ObjectID = require('mongodb').ObjectID;
+
+var statusCode;
+
 
 /*************************************************************
 
@@ -32,6 +36,11 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+var headers = defaultCorsHeaders;
+headers['Content-Type'] = 'text/plain';
+
+
+
 
 var Message = function(username, message, roomname, createdAt) {
   this.username = username || 'username';
@@ -48,6 +57,90 @@ var storage = {
 exports.defaultCorseHeaders = defaultCorsHeaders;
 
 exports.requestHandler = function(request, response) {
+
+
+  console.log('request starting...');
+
+  var filePath = '.' + request.url;
+  if (filePath === './') {
+    filePath = './index.html';
+  }
+  console.log(filePath);
+  var extname = path.extname(filePath);
+  console.log(extname);
+  var contentType = 'text/html';
+  switch (extname) {
+  case '.js':
+    contentType = 'text/javascript';
+    break;
+  case '.css':
+    contentType = 'text/css';
+    break;
+  case '.json':
+    contentType = 'application/json';
+    break;
+  case '.png':
+    contentType = 'image/png';
+    break;      
+  case '.jpg':
+    contentType = 'image/jpg';
+    break;
+  case '.wav':
+    contentType = 'audio/wav';
+    break;
+  }
+
+  fs.readFile(filePath, function(error, content) {
+    if (error) {
+      if (request.method === 'GET' && request.url === '/classes/messages') {
+        console.log('get me');
+        statusCode = 200; 
+        response.writeHead(200, headers);
+
+        response.end(JSON.stringify(storage));
+      } else if (request.method === 'OPTIONS' || request.url === '/classes/messages/?order=-createdAt') {
+        statusCode = 200; 
+        response.writeHead(200, headers);
+
+        var sortedStorage = {results: []};
+        sortedStorage.results = _.sortBy(storage.results, 'createdAt');
+
+        response.end(JSON.stringify(sortedStorage));
+      } else if (request.method === 'POST') {
+        statusCode = 201;
+        response.writeHead(statusCode, headers);
+
+        var result = '';
+        request.on('data', function(data) {
+          result += data;
+        });
+
+        request.on('end', function() {
+          var parsed = JSON.parse(result);
+          var newMessage = new Message(
+            parsed.username,
+            parsed.message,
+            parsed.roomname,
+            new Date()
+          );
+          storage.results.push(newMessage);
+        });
+
+        response.end();
+      } else {
+        statusCode = 404;
+        response.writeHead(statusCode, headers);
+        response.end();
+      }
+
+    } else {
+      response.writeHead(200, { 'Content-Type': contentType });
+      response.end(content, 'utf-8');
+    }
+  });
+
+
+  console.log('Server running at http://127.0.0.1:3000/');
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -65,59 +158,16 @@ exports.requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   // The outgoing status.
-  var statusCode;
 
   // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-
-  if (request.method === 'GET' && request.url === '/classes/messages') {
-    statusCode = 200; 
-    response.writeHead(200, headers);
-
-    response.end(JSON.stringify(storage));
-  } else if (request.method === 'OPTIONS' || request.url === '/classes/messages/?order=-createdAt') {
-    statusCode = 200; 
-    response.writeHead(200, headers);
-
-    var sortedStorage = {results: []};
-    sortedStorage.results = _.sortBy(storage.results, 'createdAt');
-
-    response.end(JSON.stringify(sortedStorage));
-  } else if (request.method === 'POST') {
-    statusCode = 201;
-    response.writeHead(statusCode, headers);
-
-    var result = '';
-    request.on('data', function(data) {
-      result += data;
-    });
-
-    request.on('end', function() {
-      var parsed = JSON.parse(result);
-      var newMessage = new Message(
-        parsed.username,
-        parsed.message,
-        parsed.roomname,
-        new Date()
-      );
-      storage.results.push(newMessage);
-    });
-
-    response.end();
-  } else {
-    statusCode = 404;
-    response.writeHead(statusCode, headers);
-    response.end();
-  }
 
 
   // Make sure to always call response.end() - Node may not send
