@@ -50,9 +50,18 @@ var Message = function(username, message, roomname, createdAt) {
   this.objectId = new ObjectID();
 };
 
-var storage = {
-  results: [],
-};
+var storage;
+
+fs.readFile('messageStorage.txt', function read(err, data) {
+  if (err) {
+    throw err;
+  }
+  if (data) {
+    storage = JSON.parse(data);
+  } else {
+    storage = {results: []};
+  }
+});
 
 exports.defaultCorseHeaders = defaultCorsHeaders;
 
@@ -91,7 +100,6 @@ exports.requestHandler = function(request, response) {
   fs.readFile(filePath, function(error, content) {
     if (error) {
       if (request.method === 'GET' && request.url === '../client/classes/messages') {
-        console.log('get me');
         statusCode = 200;
         response.writeHead(200, headers);
 
@@ -122,6 +130,10 @@ exports.requestHandler = function(request, response) {
             new Date()
           );
           storage.results.push(newMessage);
+          fs.writeFile('messageStorage.txt', JSON.stringify(storage), function(err) {
+            if (err) { return console.log(err); }
+
+          });
         });
 
         response.end();
